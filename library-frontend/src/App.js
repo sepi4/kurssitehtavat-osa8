@@ -15,16 +15,14 @@ const ALL_AUTHORS = gql`{
   }
 }
 `
-
-//  <ApolloConsumer>
-//    {(client =>
-//      <Query query={ALL_PERSONS}>
-//        {(result) =>
-//          <Persons result={result} client={client} />
-//        }
-//      </Query>
-//    )}
-//  </ApolloConsumer>
+const ALL_BOOKS = gql`{
+  allBooks {
+    title
+    published
+    author
+  }
+}
+`
 
 const App = () => {
   const [page, setPage] = useState('authors')
@@ -38,22 +36,32 @@ const App = () => {
       </div>
       <ApolloConsumer>
         {client => 
-          <Query query={ALL_AUTHORS}>
-            {result =>
-              <Authors 
-                result={result} 
-                client={client} 
-                show={page === 'authors'} 
-              />
-            }
-          </Query>
+          <>
+
+            <Query query={ALL_AUTHORS}>
+              {result =>
+                <Authors 
+                  result={result} 
+                  client={client} 
+                  show={page === 'authors'} 
+                />
+              }
+            </Query>
+
+            <Query query={ALL_BOOKS}>
+              {result =>
+                <Books
+                  result={result} 
+                  client={client} 
+                  show={page === 'books'}
+                />
+              }
+            </Query>
+          </>
         }
       </ApolloConsumer>
 
 
-      <Books
-        show={page === 'books'}
-      />
 
       <NewBook
         show={page === 'add'}

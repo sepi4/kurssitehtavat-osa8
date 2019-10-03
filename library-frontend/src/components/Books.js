@@ -5,7 +5,10 @@ const Books = (props) => {
     return null
   }
 
-  const books = []
+  const books = props.result.data.allBooks
+  if (books === undefined) {
+    return null
+  }
 
   return (
     <div>
