@@ -58,6 +58,7 @@ const Authors = (props) => {
         {updateBirthyear => 
           <SetAuthor
             updateBirthyear={updateBirthyear}
+            authors={authors}
           />
         }
       </Mutation>

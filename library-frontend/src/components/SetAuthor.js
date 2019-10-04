@@ -6,16 +6,19 @@ const SetAuthor = (props) => {
 
   const submit = async (e) => {
     e.preventDefault()
-    console.log(props)
-    console.log(name, born)
 
-    await props.updateBirthyear({
-      variables: { name, born }
-    })
-    console.log('update birthyear')
+    try {
+      await props.updateBirthyear({
+        variables: { name, born }
+      })
+      console.log('update birthyear')
 
-    setName('')
-    setBorn('')
+      setName('')
+      setBorn('')
+    }
+    catch {
+      console.log('wrong name or born year')
+    }
   }
 
   return (
@@ -24,10 +27,9 @@ const SetAuthor = (props) => {
       <form onSubmit={submit}>
         <div>
           name
-          <input
-            value={name}
-            onChange={({ target }) => setName(target.value)}
-          />
+          <select value={name} onChange={({target}) => setName(target.value)}>
+            {props.authors.map((a, i) => <option key={`${a.name}${i}`} value={a.name}>{a.name}</option>)}
+          </select>
         </div>
         <div>
           born
