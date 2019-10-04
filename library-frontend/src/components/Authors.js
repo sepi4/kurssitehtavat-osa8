@@ -1,5 +1,22 @@
 import React from 'react'
-// import React, { useState } from 'react'
+import SetAuthor from './SetAuthor'
+import { Mutation } from 'react-apollo'
+import { gql } from 'apollo-boost'
+
+const UPDATE_BIRTHYEAR = gql`
+mutation(
+  $name: String!,
+  $born: Int!
+) {
+  editAuthor(
+    name: $name, 
+    setBornTo: $born
+  ) {
+    name
+    born
+  }
+}
+`
 
 const Authors = (props) => {
   if (!props.show) {
@@ -33,6 +50,17 @@ const Authors = (props) => {
           )}
         </tbody>
       </table>
+
+      <Mutation
+        mutation={UPDATE_BIRTHYEAR}
+        refetchQueries={[{ query: props.ALL_AUTHORS }]}
+      >
+        {updateBirthyear => 
+          <SetAuthor
+            updateBirthyear={updateBirthyear}
+          />
+        }
+      </Mutation>
 
     </div>
   )

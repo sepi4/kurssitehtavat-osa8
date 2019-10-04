@@ -42,6 +42,7 @@ mutation(
 }
 `
 
+
 const App = () => {
   const [page, setPage] = useState('authors')
 
@@ -62,6 +63,7 @@ const App = () => {
                   result={result} 
                   client={client} 
                   show={page === 'authors'} 
+                  ALL_AUTHORS={ALL_AUTHORS}
                 />
               }
             </Query>
