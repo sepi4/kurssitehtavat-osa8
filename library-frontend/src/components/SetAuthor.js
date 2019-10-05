@@ -27,7 +27,11 @@ const SetAuthor = (props) => {
       <form onSubmit={submit}>
         <div>
           name
-          <select value={name} onChange={({target}) => setName(target.value)}>
+          <select 
+            value={name} 
+            onChange={({target}) => setName(target.value)}
+          >
+            <option defaultValue disabled hidden></option>
             {props.authors.map((a, i) => <option key={`${a.name}${i}`} value={a.name}>{a.name}</option>)}
           </select>
         </div>

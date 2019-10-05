@@ -15,33 +15,39 @@ const ALL_AUTHORS = gql`{
   }
 }
 `
+
 const ALL_BOOKS = gql`{
   allBooks {
     title
     published
-    author
   }
 }
 `
+
 const ADD_BOOK = gql`
 mutation(
   $title: String!, 
   $author: String!, 
   $published: Int!, 
-  $genres: [String!]!
+  $genres: [String!]!,
 ) {
   addBook(
     title: $title,
-    author: $author,
+    name: $author,
+    born: null,
     published: $published,
     genres: $genres
   ) {
-    title,
-      author
+    title
+    author {
+      name
+      born
+    }
+    published
+    genres
   }
 }
 `
-
 
 const App = () => {
   const [page, setPage] = useState('authors')
@@ -93,9 +99,7 @@ const App = () => {
         }
       </Mutation>
 
-
     </div>
   )
 }
-
 export default App
