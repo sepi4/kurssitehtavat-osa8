@@ -58,7 +58,7 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    hello: () => "hello kissa",
+    hello: () => 'hello kissa',
     bookCount: () => Book.countDocuments(),
     authorCount: () => Author.countDocuments(),
     allBooks: async (root, args) => {
@@ -70,7 +70,7 @@ const resolvers = {
   },
   Author: {
     bookCount: async (a) => {
-      const books = await Book.find({author: a._id}) 
+      const books = await Book.find({ author: a._id })
       return books.length
     },
   },
