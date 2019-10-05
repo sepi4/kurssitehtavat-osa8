@@ -62,21 +62,8 @@ const resolvers = {
     bookCount: () => Book.countDocuments(),
     authorCount: () => Author.countDocuments(),
     allBooks: async (root, args) => {
-      let allBooks = await Book.find({})
-      // let allAuthors = await Author.find({})
-      // // console.log(allBooks[0])
-      // // console.log(allAuthors)
-
-      // allBooks = allBooks.map(book => {
-      //   const authorSameId = allAuthors.find(a => a._id.toString() === book.author.toString())
-      //   return { 
-      //     genres: book.genres,
-      //     title: book.title,
-      //     published: book.published,
-      //     author: authorSameId.name
-      //   }
-      // })
-      // console.log(allBooks)
+      const allBooks = await Book.find({})
+        .populate('author', { name: true })
       return allBooks
     },
     allAuthors: () => Author.find({})
@@ -89,7 +76,7 @@ const resolvers = {
   },
   Mutation: {
     addBook: async (root, args) => {
-      let author = await Author.findOne({ name: args.name }) //authors.find((a) => a.name === book.author)
+      let author = await Author.findOne({ name: args.name })
 
       if (!author) {
         author = new Author({ name: args.name })
