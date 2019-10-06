@@ -98,11 +98,6 @@ const resolvers = {
       return context.currentUser
     }
   },
-  /*
-{
-  "Authorization": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNlcGkiLCJpZCI6IjVkOThiYTEwZmMwZDQ2MDlmZGYzNmZhOSIsImlhdCI6MTU3MDI5MTYxM30.0C1ej25oc-xkpfvsxecPekH49DaIhmgkwfiiLnVdsMw"
-}
-*/
 
   Author: {
     bookCount: async (a) => {

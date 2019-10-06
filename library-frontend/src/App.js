@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 
-import { Query, ApolloConsumer, Mutation } from 'react-apollo'
+import { Query, ApolloConsumer, Mutation, useApolloClient } from 'react-apollo'
 import { gql } from 'apollo-boost'
 
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
+import Login from './components/Login'
+
 
 const ALL_AUTHORS = gql`
   {
@@ -53,19 +55,44 @@ const ADD_BOOK = gql`
     }
   }
 `
+const LOGIN = gql`
+  mutation login(
+    $username: String!, 
+    $password: String!
+  ) {
+    login(
+      username: $username, 
+      password: $password)  
+    {
+      value
+    }
+  }
+`
 
 const App = () => {
-  const [token, setToken] = useState(null)
+  const [token, setToken] = useState(localStorage.getItem('library-app-user-token'))
   const [page, setPage] = useState('authors')
 
+  const client = useApolloClient()
+  // console.log('client', client)
+  // console.log('token', token)
 
+  const logout = () => {
+    setToken(null)
+    localStorage.clear()
+    client.resetStore()
+  }
 
   return (
     <div>
       <div>
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
-        <button onClick={() => setPage('add')}>add book</button>
+        <button onClick={() => setPage('add')} disabled={!token}>add book</button>
+        {!token
+            ? <button onClick={() => setPage('login')}>login</button>
+            : <button onClick={() => logout()}>logout</button>
+        }
       </div>
       <ApolloConsumer>
         {client => (
@@ -77,6 +104,7 @@ const App = () => {
                   client={client}
                   show={page === 'authors'}
                   ALL_AUTHORS={ALL_AUTHORS}
+                  token={token}
                 />
               )}
             </Query>
@@ -94,9 +122,25 @@ const App = () => {
         )}
       </ApolloConsumer>
 
-      <Mutation mutation={ADD_BOOK} refetchQueries={[{ query: ALL_BOOKS }]}>
+      <Mutation 
+        mutation={ADD_BOOK} 
+        refetchQueries={[{ query: ALL_BOOKS }]}
+      >
         {addBook => <NewBook show={page === 'add'} addBook={addBook} />}
       </Mutation>
+
+      <Mutation
+        mutation={LOGIN}
+        refetchQueries={[{ query: ALL_AUTHORS }]}
+      >
+        {login => <Login 
+          login={login} 
+          show={page === 'login'} 
+          setToken={setToken}
+          setPage={setPage}
+        /> }
+      </Mutation>
+
     </div>
   )
 }

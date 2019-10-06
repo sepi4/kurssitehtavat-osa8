@@ -19,7 +19,6 @@ mutation(
 `
 
 const Authors = (props) => {
-  console.log('Authors props', props)
   if (!props.show || !props.result.data) {
     return null
   }
@@ -61,6 +60,7 @@ const Authors = (props) => {
           <SetAuthor
             updateBirthyear={updateBirthyear}
             authors={authors}
+            token={props.token}
           />
         }
       </Mutation>
