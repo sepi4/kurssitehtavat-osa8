@@ -19,7 +19,7 @@ mutation(
 `
 
 const Authors = (props) => {
-  if (!props.show || !props.result.data) {
+  if (!props.result.data) {
     return null
   }
 

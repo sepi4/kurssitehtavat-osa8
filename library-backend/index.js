@@ -108,7 +108,6 @@ const resolvers = {
 
   Mutation: {
     addBook: async (root, args, context) => {
-      // console.log('addBook context.currentUser', context.currentUser)
       if (!context.currentUser) {
         throw new UserInputError('not logged in to add book')
       }
@@ -156,6 +155,7 @@ const resolvers = {
         username: args.username,
         favoriteGenre: args.favoriteGenre,
       })
+
 
       return user.save()
         .catch(error => {

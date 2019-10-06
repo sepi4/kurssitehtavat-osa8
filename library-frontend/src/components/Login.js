@@ -4,12 +4,6 @@ const Login = (props) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
-  if (!props.show) {
-    return null
-  }
-
-  // console.log('login', props)
-
   const submit = async (e) => {
     e.preventDefault()
     try {
@@ -20,10 +14,11 @@ const Login = (props) => {
         const token = result.data.login.value
         props.setToken(token)
         localStorage.setItem('library-app-user-token', token)
+        setUsername('')
+        setPassword('')
         props.setPage('authors')
+        props.me.refetch()
       }
-      setUsername('')
-      setPassword('')
     }
     catch (err) {
       console.log(err)
@@ -36,11 +31,19 @@ const Login = (props) => {
       <form onSubmit={submit}>
         <div>
           username
-          <input type="text" value={username} onChange={e => setUsername(e.target.value)} />
+          <input 
+            type="text" 
+            value={username} 
+            onChange={e => setUsername(e.target.value)} 
+          />
         </div>
         <div>
           password
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+          <input 
+            type="password" 
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+          />
         </div>
         <button type='submit'>login</button>
       </form>

@@ -11,7 +11,6 @@ const SetAuthor = (props) => {
       await props.updateBirthyear({
         variables: { name, born }
       })
-      console.log('update birthyear')
 
       setName('')
       setBorn('')

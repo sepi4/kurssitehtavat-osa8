@@ -1,13 +1,22 @@
 import React, { useState } from 'react'
 
-import { Query, ApolloConsumer, Mutation, useApolloClient } from 'react-apollo'
-import { gql } from 'apollo-boost'
+import { useApolloClient } from 'react-apollo'
+import { useQuery, useMutation } from '@apollo/react-hooks'
+import gql from 'graphql-tag'
 
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import Login from './components/Login'
 
+const ME = gql`
+  {
+    me {
+      username
+      favoriteGenre
+    }
+  }
+`
 
 const ALL_AUTHORS = gql`
   {
@@ -74,9 +83,8 @@ const App = () => {
   const [token, setToken] = useState(localStorage.getItem('library-app-user-token'))
   const [page, setPage] = useState('authors')
 
+
   const client = useApolloClient()
-  // console.log('client', client)
-  // console.log('token', token)
 
   const logout = () => {
     setToken(null)
@@ -84,64 +92,87 @@ const App = () => {
     client.resetStore()
   }
 
+  const allBooks = useQuery(ALL_BOOKS)
+  const allAuthors = useQuery(ALL_AUTHORS)
+  const me = useQuery(ME)
+  const [login] = useMutation(LOGIN)
+  const [addBook] = useMutation(ADD_BOOK, {
+    onError: () => console.log('error in addBook useMutation'),
+    update: (store, response) => {
+      const dataInStore = store.readQuery({ query: ALL_BOOKS })
+      dataInStore.allBooks.push(response.data.addBook)
+      store.writeQuery({
+        query: ALL_BOOKS,
+        data: dataInStore
+      })
+    }
+  })
+
+  
+
+  const pageToShow = () => {
+    switch (page) {
+      case 'books':
+        return (
+          <Books
+            result={allBooks}
+            type='books'
+          />
+        )
+      case 'recommend':
+        return (
+          <Books
+            result={allBooks}
+            me={me}
+            type='recommend'
+          />
+        )
+      case 'authors':
+        return ( 
+          <Authors
+            result={allAuthors}
+            token={token}
+          />
+        )
+      case 'add':
+        return (
+          <NewBook 
+            addBook={addBook}
+          />
+        )
+      case 'login':
+        return (
+          <Login 
+            setToken={setToken}
+            setPage={setPage}
+            login={login}
+            me={me}
+          />
+        )
+      default:
+        return null
+    }
+  }
+    
+  // const username = (me.data && me.data.me && !user) 
+  //   ? me.data.me.username 
+  //   : user
+  const username = (me.data && me.data.me) 
+    ? me.data.me.username 
+    : null
+
   return (
     <div>
       <div>
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
         <button onClick={() => setPage('add')} disabled={!token}>add book</button>
-        {!token
-            ? <button onClick={() => setPage('login')}>login</button>
-            : <button onClick={() => logout()}>logout</button>
+        {(token) && <button onClick={() => setPage('recommend')}>recommend</button> }
+        {!token ? <button onClick={() => { setPage('login') }}>login</button>
+            : <button onClick={() => logout()}>logout {username}</button>
         }
       </div>
-      <ApolloConsumer>
-        {client => (
-          <>
-            <Query query={ALL_AUTHORS}>
-              {result => (
-                <Authors
-                  result={result}
-                  client={client}
-                  show={page === 'authors'}
-                  ALL_AUTHORS={ALL_AUTHORS}
-                  token={token}
-                />
-              )}
-            </Query>
-
-            <Query query={ALL_BOOKS}>
-              {result => (
-                <Books
-                  result={result}
-                  client={client}
-                  show={page === 'books'}
-                />
-              )}
-            </Query>
-          </>
-        )}
-      </ApolloConsumer>
-
-      <Mutation 
-        mutation={ADD_BOOK} 
-        refetchQueries={[{ query: ALL_BOOKS }]}
-      >
-        {addBook => <NewBook show={page === 'add'} addBook={addBook} />}
-      </Mutation>
-
-      <Mutation
-        mutation={LOGIN}
-        refetchQueries={[{ query: ALL_AUTHORS }]}
-      >
-        {login => <Login 
-          login={login} 
-          show={page === 'login'} 
-          setToken={setToken}
-          setPage={setPage}
-        /> }
-      </Mutation>
-
+      {pageToShow()}    
     </div>
   )
 }
