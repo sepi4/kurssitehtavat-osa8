@@ -55,7 +55,10 @@ const ADD_BOOK = gql`
 `
 
 const App = () => {
+  const [token, setToken] = useState(null)
   const [page, setPage] = useState('authors')
+
+
 
   return (
     <div>

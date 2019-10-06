@@ -16,8 +16,8 @@ const SetAuthor = (props) => {
       setName('')
       setBorn('')
     }
-    catch {
-      console.log('wrong name or born year')
+    catch (err) {
+      console.log(err)
     }
   }
 

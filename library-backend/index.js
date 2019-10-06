@@ -87,9 +87,13 @@ const resolvers = {
     allBooks: async (root, args) => {
       const allBooks = await Book.find({})
         .populate('author', { name: true })
+      console.log(allBooks)
       return allBooks
     },
-    allAuthors: () => Author.find({}),
+    allAuthors: async () => {
+      const all = await Author.find({})
+      return all
+    },
     me: (root, args, context) => {
       return context.currentUser
     }
@@ -111,7 +115,7 @@ const resolvers = {
     addBook: async (root, args, context) => {
       // console.log('addBook context.currentUser', context.currentUser)
       if (!context.currentUser) {
-        throw new UserInputError('not logged in')
+        throw new UserInputError('not logged in to add book')
       }
 
       let author = await Author.findOne({ name: args.name })
@@ -136,7 +140,7 @@ const resolvers = {
 
     editAuthor: async (root, args, context) => {
       if (!context.currentUser) {
-        throw new UserInputError('not logged in')
+        throw new UserInputError('not logged in to edit author data')
       }
       let author = await Author.findOne({ name: args.name })
       author.born = args.setBornTo

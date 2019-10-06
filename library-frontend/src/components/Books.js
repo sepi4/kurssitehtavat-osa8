@@ -1,7 +1,8 @@
 import React from 'react'
 
 const Books = (props) => {
-  if (!props.show) {
+  console.log('Books props', props)
+  if (!props.show || !props.result.data) {
     return null
   }
 

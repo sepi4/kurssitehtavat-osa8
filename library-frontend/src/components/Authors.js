@@ -19,9 +19,11 @@ mutation(
 `
 
 const Authors = (props) => {
-  if (!props.show) {
+  console.log('Authors props', props)
+  if (!props.show || !props.result.data) {
     return null
   }
+
   const authors = props.result.data.allAuthors
   if (authors === undefined) {
     return null

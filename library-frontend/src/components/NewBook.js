@@ -10,7 +10,6 @@ const NewBook = (props) => {
   if (!props.show) {
     return null
   }
-  // console.log(props)
 
   const submit = async (e) => {
     e.preventDefault()
