@@ -25,6 +25,9 @@ function Books(props) {
 
   useEffect(() => {
     setBooks(props.result.data.allBooks)
+    return () => {
+      console.log('should be cleaning here')
+    }
   }, [props.result.data.allBooks])
 
   if (!props.result.data && !props.result.data.allBooks) {
@@ -48,33 +51,20 @@ function Books(props) {
   }
 
 
-  if (props.type === 'recommend' && props.me.data.me) {
-    const favoriteGenre = props.me.data.me.favoriteGenre
-    fetchFilteredBooks(favoriteGenre)
-    return (
-      <div>
-        <h2>recommends</h2>
-        <BooksTable books={books} />
-        <p>current genre: <strong>{favoriteGenre}</strong></p>
-      </div>
-    )
-  }
-  else {
-    return (
-      <div>
-        <h2>books</h2>
-        <BooksTable books={books} />
-        <p>current genre: <strong>{genre ? genre : 'ALL'}</strong></p>
-        <button onClick={() => fetchFilteredBooks('')}>all genres</button>
-        {genres.map(g =>
-          <button key={g} onClick={() => {
-            setGenre(g)
-            fetchFilteredBooks(g)
-          }}>{g}</button>
-        )}
-      </div>
-    )
-  }
+  return (
+    <div>
+      <h2>books</h2>
+      <BooksTable books={books} />
+      <p>current genre: <strong>{genre ? genre : 'ALL'}</strong></p>
+      <button onClick={() => fetchFilteredBooks('')}>all genres</button>
+      {genres.map(g =>
+        <button key={g} onClick={() => {
+          setGenre(g)
+          fetchFilteredBooks(g)
+        }}>{g}</button>
+      )}
+    </div>
+  )
 }
 
 export default Books

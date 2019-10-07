@@ -3,7 +3,8 @@ import React, { useState } from 'react'
 import { 
   useQuery, 
   useMutation, 
-  // useApolloClient 
+  // useApolloClient,
+  useSubscription,
 } from '@apollo/react-hooks'
 
 import gql from 'graphql-tag'
@@ -12,7 +13,16 @@ import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import Login from './components/Login'
+import Navbar from './components/Navbar'
+import Recommends from './components/Recommends'
 
+const BOOK_ADDED = gql`
+subscription {
+  bookAdded {
+    title
+  }
+}
+`
 
 const ME = gql`
   {
@@ -112,10 +122,6 @@ const App = () => {
       })
     }
   })
-  // const booksOfGenre = useQuery(
-  //   BOOKS_OF_GENRE,
-  //   { variables: { genre: '' } }
-  // );
 
   
 
@@ -130,10 +136,8 @@ const App = () => {
         )
       case 'recommend':
         return (
-          <Books
-            result={allBooks}
+          <Recommends
             me={me}
-            type='recommend'
           />
         )
       case 'authors':
@@ -141,6 +145,7 @@ const App = () => {
           <Authors
             result={allAuthors}
             token={token}
+            ALL_AUTHORS={ALL_AUTHORS}
           />
         )
       case 'add':
@@ -162,25 +167,26 @@ const App = () => {
         return null
     }
   }
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      const title = subscriptionData.data.bookAdded.title
+      window.alert(`new book added: '${title}'`)
+    }
+  })
     
-  // const username = (me.data && me.data.me && !user) 
-  //   ? me.data.me.username 
-  //   : user
   const username = (me.data && me.data.me) 
     ? me.data.me.username 
     : null
 
   return (
     <div>
-      <div>
-        <button onClick={() => setPage('authors')}>authors</button>
-        <button onClick={() => setPage('books')}>books</button>
-        <button onClick={() => setPage('add')} disabled={!token}>add book</button>
-        {(token) && <button onClick={() => setPage('recommend')}>recommend</button> }
-        {!token ? <button onClick={() => { setPage('login') }}>login</button>
-            : <button onClick={() => logout()}>logout {username}</button>
-        }
-      </div>
+      <Navbar 
+        setPage={setPage}
+        token={token}
+        username={username}
+        logout={logout}
+      />
       {pageToShow()}    
     </div>
   )
