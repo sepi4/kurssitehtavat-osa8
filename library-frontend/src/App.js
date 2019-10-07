@@ -9,6 +9,7 @@ import Books from './components/Books'
 import NewBook from './components/NewBook'
 import Login from './components/Login'
 
+
 const ME = gql`
   {
     me {
@@ -107,6 +108,10 @@ const App = () => {
       })
     }
   })
+  // const booksOfGenre = useQuery(
+  //   BOOKS_OF_GENRE,
+  //   { variables: { genre: '' } }
+  // );
 
   
 

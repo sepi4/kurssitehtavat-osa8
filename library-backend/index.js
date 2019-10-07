@@ -37,6 +37,7 @@ const typeDefs = gql`
     allAuthors: [Author]!
     allBooks(author: String, genre: String): [Book]!
     me: User
+    booksOfGenre(genre: String): [Book]!
   }
 
   type Author {
@@ -84,10 +85,9 @@ const resolvers = {
   Query: {
     bookCount: () => Book.countDocuments(),
     authorCount: () => Author.countDocuments(),
-    allBooks: async (root, args) => {
+    allBooks: async () => {
       const allBooks = await Book.find({})
         .populate('author', { name: true })
-      console.log(allBooks)
       return allBooks
     },
     allAuthors: async () => {
@@ -96,6 +96,16 @@ const resolvers = {
     },
     me: (root, args, context) => {
       return context.currentUser
+    },
+    booksOfGenre: async (root, args) => {
+      console.log('booksOfGenre args', args)
+      let allBooks = await Book.find({})
+        .populate('author', { name: true })
+      if (args.genre.length !== 0) {
+        allBooks = allBooks.filter(b => b.genres.includes(args.genre))
+      }
+      // console.log('booksOfGenre books', allBooks)
+      return allBooks
     }
   },
 
