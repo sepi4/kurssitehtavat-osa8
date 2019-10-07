@@ -27,9 +27,11 @@ function Books(props) {
     setBooks(props.result.data.allBooks)
   }, [props.result.data.allBooks])
 
-  if (!props.result.data.allBooks) {
+  if (!props.result.data && !props.result.data.allBooks) {
     return null
   }
+
+
   const allBooks = props.result.data.allBooks
 
   let genres = allBooks.reduce( (pre, cur) => pre.concat(cur.genres), [])
@@ -37,10 +39,10 @@ function Books(props) {
 
 
   const fetchFilteredBooks = async (g) => {
-    setGenre(g)
     const {data} = await client.query({
       query: BOOKS_OF_GENRE,
-      variables: { genre: g }
+      variables: { genre: g },
+      fetchPolicy: 'no-cache'
     })
     setBooks(data.booksOfGenre)
   }
@@ -48,10 +50,11 @@ function Books(props) {
 
   if (props.type === 'recommend' && props.me.data.me) {
     const favoriteGenre = props.me.data.me.favoriteGenre
+    fetchFilteredBooks(favoriteGenre)
     return (
       <div>
         <h2>recommends</h2>
-        <BooksTable books={books.filter(b => b.genres.includes(favoriteGenre))} />
+        <BooksTable books={books} />
         <p>current genre: <strong>{favoriteGenre}</strong></p>
       </div>
     )
@@ -64,7 +67,10 @@ function Books(props) {
         <p>current genre: <strong>{genre ? genre : 'ALL'}</strong></p>
         <button onClick={() => fetchFilteredBooks('')}>all genres</button>
         {genres.map(g =>
-          <button key={g} onClick={() => fetchFilteredBooks(g)}>{g}</button>
+          <button key={g} onClick={() => {
+            setGenre(g)
+            fetchFilteredBooks(g)
+          }}>{g}</button>
         )}
       </div>
     )

@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 
-import { useApolloClient } from 'react-apollo'
-import { useQuery, useMutation } from '@apollo/react-hooks'
+import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
 import gql from 'graphql-tag'
 
 import Authors from './components/Authors'
@@ -90,7 +89,7 @@ const App = () => {
   const logout = () => {
     setToken(null)
     localStorage.clear()
-    client.resetStore()
+    // client.resetStore()
   }
 
   const allBooks = useQuery(ALL_BOOKS)
