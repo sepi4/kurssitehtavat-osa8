@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
 
-import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
+import { 
+  useQuery, 
+  useMutation, 
+  // useApolloClient 
+} from '@apollo/react-hooks'
+
 import gql from 'graphql-tag'
 
 import Authors from './components/Authors'
@@ -84,7 +89,7 @@ const App = () => {
   const [page, setPage] = useState('authors')
 
 
-  const client = useApolloClient()
+  // const client = useApolloClient()
 
   const logout = () => {
     setToken(null)

@@ -5,6 +5,9 @@ const Book = require('./models/book')
 const Author = require('./models/author')
 const User = require('./models/user')
 const config = require('./utils/config')
+const { PubSub } = require('apollo-server')
+
+const pubsub = new PubSub()
 
 const JWT_SECRET = config.JWT_SECRET
 
@@ -20,6 +23,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true })
     console.log('error connection to MongoDB:', error.message)
   })
 
+// allBooks(author: String, genre: String): [Book]!
 const typeDefs = gql` 
   type User {
     username: String!
@@ -35,7 +39,7 @@ const typeDefs = gql`
     bookCount: Int!
     authorCount: Int!
     allAuthors: [Author]!
-    allBooks(author: String, genre: String): [Book]!
+    allBooks: [Book]!
     me: User
     booksOfGenre(genre: String): [Book]!
   }
@@ -78,6 +82,10 @@ const typeDefs = gql`
       username: String!
       password: String!
     ): Token
+  }
+
+  type Subscription {
+    bookAdded: Book!
   }
 `
 
@@ -130,9 +138,13 @@ const resolvers = {
         }
         const book = new Book({ ...args, author })
         await book.save()
-
         // create author only if creation of book is ok
         await author.save()
+
+        pubsub.publish('BOOK_ADDED',
+          { bookAdded: book },
+        )
+
         return book
       }
       catch (error) {
@@ -141,6 +153,7 @@ const resolvers = {
         })
       }
     },
+
 
     editAuthor: async (root, args, context) => {
       if (!context.currentUser) {
@@ -191,6 +204,11 @@ const resolvers = {
       }
     },
   },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED']),
+    }
+  },
 }
 
 const server = new ApolloServer({
@@ -206,7 +224,8 @@ const server = new ApolloServer({
   }
 })
 
-server.listen().then(({ url }) => {
+server.listen().then(({ url, subscriptionsUrl }) => {
   console.log(`Server ready at ${url}`)
+  console.log(`Subcriptions ready at ${subscriptionsUrl}`)
 })
 
