@@ -6,12 +6,14 @@ import { useApolloClient } from '@apollo/react-hooks'
 const BOOKS_OF_GENRE = gql`
  query ($genre: String) {
    booksOfGenre(genre: $genre){
-     title
-     published
-     author {
-       name
-     }
-     genres
+      title
+      author {
+        name
+        born
+      }
+      published
+      genres
+      id
    }
  }
 `

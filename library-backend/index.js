@@ -106,7 +106,7 @@ const resolvers = {
       return context.currentUser
     },
     booksOfGenre: async (root, args) => {
-      console.log('booksOfGenre args', args)
+      // console.log('booksOfGenre args', args)
       let allBooks = await Book.find({})
         .populate('author', { name: true })
       if (args.genre.length !== 0) {
@@ -126,6 +126,7 @@ const resolvers = {
 
   Mutation: {
     addBook: async (root, args, context) => {
+      // console.log('addBook')
       if (!context.currentUser) {
         throw new UserInputError('not logged in to add book')
       }
@@ -133,6 +134,7 @@ const resolvers = {
       let author = await Author.findOne({ name: args.name })
 
       try {
+        // console.log('addBook try')
         if (!author) {
           author = new Author({ name: args.name })
         }
@@ -148,6 +150,7 @@ const resolvers = {
         return book
       }
       catch (error) {
+        // console.log('addBook catch')
         throw new UserInputError(error.message, {
           invalidArgs: args,
         })

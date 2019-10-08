@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { 
   useQuery, 
   useMutation, 
-  // useApolloClient,
+  useApolloClient,
   useSubscription,
 } from '@apollo/react-hooks'
 
@@ -19,8 +19,15 @@ import Recommends from './components/Recommends'
 const BOOK_ADDED = gql`
 subscription {
   bookAdded {
-    title
-  }
+      title
+      author {
+        name
+        born
+      }
+      published
+      genres
+      id
+    }
 }
 `
 
@@ -39,6 +46,7 @@ const ALL_AUTHORS = gql`
       name
       born
       bookCount
+      id
     }
   }
 `
@@ -47,11 +55,13 @@ const ALL_BOOKS = gql`
   {
     allBooks {
       title
-      published
       author {
         name
+        born
       }
+      published
       genres
+      id
     }
   }
 `
@@ -77,6 +87,7 @@ const ADD_BOOK = gql`
       }
       published
       genres
+      id
     }
   }
 `
@@ -95,31 +106,79 @@ const LOGIN = gql`
 `
 
 const App = () => {
-  const [token, setToken] = useState(localStorage.getItem('library-app-user-token'))
+  const [message, setMessage] = useState(null)
+  const [error, setError] = useState(null)
+  const [token, setToken] = useState(localStorage
+    .getItem('library-app-user-token')
+  )
   const [page, setPage] = useState('authors')
 
+  const notify = (message) => {
+    setMessage(message)
+    setTimeout(() => {
+      setMessage(null)
+    }, 5000)
+  }
+  const handleError = (error) => {
+    // console.log(Object.keys(error))
+    setError(error['message'])
+    setTimeout(() => {
+      setError(null)
+    }, 5000)
+  }
 
-  // const client = useApolloClient()
+  const client = useApolloClient()
 
   const logout = () => {
     setToken(null)
     localStorage.clear()
-    // client.resetStore()
+    client.resetStore()
   }
 
   const allBooks = useQuery(ALL_BOOKS)
   const allAuthors = useQuery(ALL_AUTHORS)
   const me = useQuery(ME)
   const [login] = useMutation(LOGIN)
-  const [addBook] = useMutation(ADD_BOOK, {
-    onError: () => console.log('error in addBook useMutation'),
-    update: (store, response) => {
-      const dataInStore = store.readQuery({ query: ALL_BOOKS })
-      dataInStore.allBooks.push(response.data.addBook)
-      store.writeQuery({
+
+  const updateCacheWith = (addedBook) => {
+
+    const dataInStore = client.readQuery({ query: ALL_BOOKS })
+    // console.log(addedBook)
+    // console.log(dataInStore)
+    const alreadyInArr = (arr, object) => 
+      arr.map(p => p.id).includes(object.id)
+    // console.log(alreadyInArr)
+    
+    if (!alreadyInArr(dataInStore.allBooks, addedBook)) {
+      dataInStore.allBooks.push(addedBook)
+      client.writeQuery({
         query: ALL_BOOKS,
-        data: dataInStore
+        data: dataInStore,
       })
+    }
+
+  }
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      const addedBook= subscriptionData.data.bookAdded
+      notify(`new book added ${addedBook.title}`)
+      updateCacheWith(addedBook)
+    }
+  })
+
+  const [addBook] = useMutation(ADD_BOOK, {
+    onError: (err) => handleError(err),
+    update: (store, response) => {
+
+      // const dataInStore = store.readQuery({ query: ALL_BOOKS })
+      // dataInStore.allBooks.push(response.data.addBook)
+      // store.writeQuery({
+      //   query: ALL_BOOKS,
+      //   data: dataInStore
+      // })
+
+      updateCacheWith(response.data.addBook)
     }
   })
 
@@ -168,12 +227,6 @@ const App = () => {
     }
   }
 
-  useSubscription(BOOK_ADDED, {
-    onSubscriptionData: ({ subscriptionData }) => {
-      const title = subscriptionData.data.bookAdded.title
-      window.alert(`new book added: '${title}'`)
-    }
-  })
     
   const username = (me.data && me.data.me) 
     ? me.data.me.username 
@@ -181,12 +234,15 @@ const App = () => {
 
   return (
     <div>
+
       <Navbar 
         setPage={setPage}
         token={token}
         username={username}
         logout={logout}
       />
+      {message && <p style={{color: 'green'}}>{message}</p>}
+      {error && <p style={{color: 'red'}}>{error}</p>}
       {pageToShow()}    
     </div>
   )
